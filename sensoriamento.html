@@ -2,64 +2,133 @@
 <html lang="pt-br">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sensoriamento</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #f0f8ff;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #4CAF50;
+    margin-bottom: 10px;
+}
+
+h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 1.2rem;
+    margin: 10px 0;
+    color: #555;
+}
+
+p span {
+    font-weight: bold;
+    color: #000;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    text-align: center;
+    margin: 20px;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    h3 {
+        font-size: 1.2rem;
+    }
+
+    p {
+        font-size: 1rem;
+    }
+
+    .container {
+        padding: 15px;
+        max-width: 100%;
+    }
+}
+
+    </style>
+    
 </head>
 
 <body>
-    <h1>Dados do Firebase</h1>
-    <h3>Monitoramento da colmeia</h3>
+    <header>
+        <h1>Sensoriamento de apiários</h1>
+    </header>
+    <main>
+        <h3>Caixa nº1:</h3>
+        <article>
+            <h5>Sensor LDR:</h5>
+            <div class="sensor">
+                <p>Voltagem ldr:<span id="ldrValue">0</span></p>
+                <p>Ambiente <span id="ldrvoltage"></span></p>
+            </div>
 
-    <p>Luz: <span id="dados">Carregando...</span></p>
-    <p>Peso: <span id="peso">Carregando...</span></p>
-    <p>Temperatura: <span id="temp">Carregando...</span></p>
-    <p>Umidade: <span id="umidade">Carregando...</span></p>
+            <h5>Estado dos LED's</h5>
+            <div class="sensor">
+                <p>LED 1: <span id="led1">---</span></p>
+                <p>LED 2: <span id="led2">---</span></p>
+            </div>
+        </article>
+    </main>
 
-    <script type="module">
-        // Import das funções necessárias
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-database.js";
-
+    <script>
         // Configurações do Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCCmlb-EUSyys7BiBkO2P6bBNNw-5t-ECw",
-            authDomain: "bartolomeu84rt.firebaseapp.com",
-            databaseURL: "https://bartolomeu84rt-default-rtdb.firebaseio.com",
-            projectId: "bartolomeu84rt",
-            storageBucket: "bartolomeu84rt.appspot.com",
-            messagingSenderId: "922056695451",
-            appId: "1:922056695451:web:07068d8e13a17bc193303e"
+        var firebaseConfig = {
+            apiKey: "AIzaSyDV6DGtTMLLVSXokrgzhHB7rqGBZutpiZg",
+            authDomain: "luz-e-led.firebaseapp.com",
+            databaseURL: "https://luz-e-led-default-rtdb.firebaseio.com/",
+            projectId: "luz-e-led",
+            storageBucket: "luz-e-led.appspot.com",
+            messagingSenderId: "288069968114",
+            appId: "1:288069968114:web:f6551059fc65ec2baaf06b"
         };
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        var database = firebase.database();
 
-        // Inicialize o Firebase
-        const app = initializeApp(firebaseConfig);
-
-        // Initialize Realtime Database and get a reference to the service
-        const database = getDatabase(app);
-
-        // Referência para o endereço no Firebase
-        const dbRef = ref(database, '/caixa/luz');
-        const pesoRef = ref(database, '/caixa/peso');
-        const tempRef = ref(database, '/caixa/temp');
-        const umidadeRef = ref(database, '/caixa/umidade');
-
-        // Ler os dados e ouvir mudanças
-        onValue(dbRef, (snapshot) => {
-            const data = snapshot.val();
-            document.getElementById('dados').innerText = JSON.stringify(data, null, 2);
+        // Ler valor do LDR
+        database.ref('/sensor/ldr').on('value', (snapshot) => {
+            document.getElementById('ldrValue').innerText = snapshot.val();
         });
 
-        onValue(pesoRef, (snapshot) => {
-            document.getElementById('peso').textContent = snapshot.val() + ' kg';
-        });
-
-        onValue(tempRef, (snapshot) => {
-            document.getElementById('temp').textContent = snapshot.val() + ' °C';
-        });
-
-        onValue(umidadeRef, (snapshot) => {
-            document.getElementById('umidade').textContent = snapshot.val() + ' %';
+        // Ler estado do LED
+        database.ref('/control/led').on('value', (snapshot) => {
+            var ledState = snapshot.val();
+            document.getElementById('ledState').innerText = ledState === 1 ? 'ON' : 'OFF';
         });
     </script>
 </body>
